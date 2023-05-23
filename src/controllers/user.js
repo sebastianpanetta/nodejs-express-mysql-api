@@ -1,4 +1,5 @@
 import { getConnection } from "../database/database";
+import { methods as userService } from "../service/user"; 
 import User from "../model/user";
 
 const getUsers = async (req, res) => {
@@ -75,20 +76,19 @@ const updateUser = async (req, res) => {
             });
         }
 
-        const connection = await getConnection();
+        let user = await userService.getUser(id);
 
-        let result = await connection.query("SELECT * FROM user WHERE id = ?", [id]);
-        if (!result[0].length) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
+        // if (!result[0].length) {
+        //     return res.status(404).json({
+        //         message: "User not found"
+        //     });
+        // }
+
+        user = await userService.updateUser(req.body, id);
         
-        result = await connection.query("UPDATE user SET ? WHERE id = ?", [req.body, id]);
-        console.log(result[0]);
         res.json({
             message: "User updated",
-            id
+            user: user
         })
     } catch(error) {
         console.log(error);
