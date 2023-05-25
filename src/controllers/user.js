@@ -2,17 +2,15 @@ import { getConnection } from "../database/database";
 import { methods as userService } from "../service/user"; 
 import User from "../model/user";
 
-const getUsers = async (req, res) => {
+const getUsers = async (_, res) => {
     try {
-        const connection = await getConnection();
-        const result = await connection.query("SELECT * FROM user");
-        console.log(result[0]);
-        res.json(result[0]);
-    } catch(error) {
-        console.log(error);
+        const users = await userService.getUsers();
+        console.log(users);
+        res.json(users);
+    } catch(e) {
+        console.error(e);
         res.status(500).json({
-            message: "Error",
-            error
+            message: "Error getting users",
         });
     }
 };
@@ -21,46 +19,32 @@ const getUser = async (req, res) => {
     try {
         console.log(req.params);
         const { id } = req.params;
-        const connection = await getConnection();
-        const result = await connection.query("SELECT * FROM user WHERE id = ?", [id]);
-        if (!result[0].length) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
-        console.log(result[0]);
-        res.json(result[0]);
-    } catch(error) {
-        console.log(error);
+        const user = await userService.getUser(id);
+        console.log(user);
+        res.json(user);
+    } catch(e) {
+        console.error(e);
         res.status(500).json({
-            message: "Error",
-            error
+            message: "Error getting user",
         });
     }
 };
 
 const addUser = async (req, res) => {
     try {
-        const user = new User(null, req.body.name, req.body.surname, req.body.email);
+        let user = new User(null, req.body.name, req.body.surname, req.body.email);
 
-        if (!user.name || !user.surname || !user.email) {
-            return res.status(400).json({
-                message: "Bad request"
-            });
-        }
+        user = await userService.addUser(user);
 
-        const connection = await getConnection();
-        const result = await connection.query("INSERT INTO user SET ?", [user]);
-        console.log(result);
+        console.log(user);
         res.json({
             message: "User added",
-            id: result[0].insertId
+            user: user
         });
-    } catch(error) {
-        console.log(error);
+    } catch(e) {
+        console.error(e);
         res.status(500).json({
-            message: "Error",
-            error
+            message: "Error creating user",
         });
     }
 };
@@ -70,31 +54,17 @@ const updateUser = async (req, res) => {
 
         const { id } = req.params;
 
-        if (!id) {
-            return res.status(400).json({
-                message: "Bad request"
-            });
-        }
-
         let user = await userService.getUser(id);
-
-        // if (!result[0].length) {
-        //     return res.status(404).json({
-        //         message: "User not found"
-        //     });
-        // }
-
         user = await userService.updateUser(req.body, id);
         
         res.json({
             message: "User updated",
             user: user
         })
-    } catch(error) {
-        console.log(error);
+    } catch(e) {
+        console.error(e);
         res.status(500).json({
-            message: "Error",
-            error
+            message: "Error updating user",
         });
     }
 };
@@ -118,11 +88,10 @@ const deleteUser = async (req, res) => {
             message: "User deleted",
             id
         })
-    } catch(error) {
-        console.log(error);
+    } catch(e) {
+        console.error(e);
         res.status(500).json({
-            message: "Error",
-            error
+            message: "Error deleting user",
         });
     }
 };

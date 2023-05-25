@@ -1,12 +1,29 @@
 import { getConnection } from "../database/database";
 
+const getUsers = async () => {
+    try {
+        const connection = await getConnection();
+        return await connection.query("SELECT * FROM user");
+    } catch(e) {
+        throw e;
+    }
+}
+
 const getUser = async (id) => {
     try {
         const connection = await getConnection();
         return await connection.query("SELECT * FROM user WHERE id = ?", [id]);
     } catch(e) {
-        console.error(e);
-        throw new Error(`Error getting user with id: ${id}`);
+        throw e;
+    }
+}
+
+const addUser = async (user) => {
+    try {
+        const connection = await getConnection();
+        return await connection.query("INSERT INTO user SET ?", [user]);
+    } catch(e) {
+        throw e;
     }
 }
 
@@ -16,12 +33,13 @@ const updateUser = async (fields, id) => {
         await connection.query("UPDATE user SET ? WHERE id = ?", [fields, id]);
         return true;
     } catch(e) {
-        console.error(e);
-        throw new Error(`Error updating user with id: ${id}`);
+        throw e;
     }
 }
 
 export const methods = {
+    getUsers,
     getUser,
+    addUser,
     updateUser
 }
