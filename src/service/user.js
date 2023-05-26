@@ -1,5 +1,10 @@
 import { methods as userRepository } from "../repository/user"
+import {
+	ReasonPhrases,
+	StatusCodes,
+} from 'http-status-codes';
 import User from "../model/user";
+import Error from "../model/error";
 
 const getUsers = async () => {
     try {
@@ -13,7 +18,9 @@ const getUsers = async () => {
 const getUser = async (id) => {
     try {
         const result = await userRepository.getUser(id);
-        // handle user not found
+        if (result[0].length == 0) {
+            throw new Error(StatusCodes.NOT_FOUND, ReasonPhrases.NOT_FOUND, `User not found for id: ${id}`);
+        }
         const user = result[0][0];
         return new User(user.id, user.name, user.surname, user.email);;
     } catch(e) {
@@ -32,19 +39,27 @@ const addUser = async (user) => {
 }
 
 const updateUser = async (fields, id) => {
-    // Validate that al least one field arrives
     try {
-        const userUpdated = await userRepository.updateUser(fields,id);
+        await userRepository.updateUser(fields,id);
         const result = await userRepository.getUser(id);
-        const user = result[0][0];
+        return result[0][0];
+    } catch(e) {
+        throw e;
+    }
+}
+
+const deleteUser = async (id) => {
+    try {
+        await userRepository.deleteUser(id)
     } catch(e) {
         throw e;
     }
 }
 
 export const methods = {
-    getUsers,
-    getUser,
-    addUser,
-    updateUser
+    getUsers: getUsers,
+    getUser: getUser,
+    addUser: addUser,
+    updateUser: updateUser,
+    deleteUser: deleteUser
 }

@@ -1,5 +1,5 @@
-import { getConnection } from "../database/database";
 import { methods as userService } from "../service/user"; 
+import { methods as errorHandler } from "./errorHandler";
 import User from "../model/user";
 
 const getUsers = async (_, res) => {
@@ -8,10 +8,8 @@ const getUsers = async (_, res) => {
         console.log(users);
         res.json(users);
     } catch(e) {
-        console.error(e);
-        res.status(500).json({
-            message: "Error getting users",
-        });
+        const error = errorHandler.handleError(e);
+        res.status(error.httpStatus).json(error.getMessage());
     }
 };
 
@@ -23,10 +21,8 @@ const getUser = async (req, res) => {
         console.log(user);
         res.json(user);
     } catch(e) {
-        console.error(e);
-        res.status(500).json({
-            message: "Error getting user",
-        });
+        const error = errorHandler.handleError(e);
+        res.status(error.httpStatus).json(error.getMessage());
     }
 };
 
@@ -42,10 +38,8 @@ const addUser = async (req, res) => {
             user: user
         });
     } catch(e) {
-        console.error(e);
-        res.status(500).json({
-            message: "Error creating user",
-        });
+        const error = errorHandler.handleError(e);
+        res.status(error.httpStatus).json(error.getMessage());
     }
 };
 
@@ -62,37 +56,26 @@ const updateUser = async (req, res) => {
             user: user
         })
     } catch(e) {
-        console.error(e);
-        res.status(500).json({
-            message: "Error updating user",
-        });
+        const error = errorHandler.handleError(e);
+        res.status(error.httpStatus).json(error.getMessage());
     }
 };
 
 const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const connection = await getConnection();
-
-        let result = await connection.query("SELECT * FROM user WHERE id = ?", [id]);
         
-        if (!result[0].length) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
-
-        result = await connection.query("DELETE FROM user WHERE id = ?", [id]);
-        console.log(result[0]);
+        await userService.getUser(id);
+        
+        await userService.deleteUser(id);
+        
         res.json({
             message: "User deleted",
             id
         })
     } catch(e) {
-        console.error(e);
-        res.status(500).json({
-            message: "Error deleting user",
-        });
+        const error = errorHandler.handleError(e);
+        res.status(error.httpStatus).json(error.getMessage());
     }
 };
 

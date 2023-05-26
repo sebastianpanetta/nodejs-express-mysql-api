@@ -37,9 +37,20 @@ const updateUser = async (fields, id) => {
     }
 }
 
+const deleteUser = async (id) => {
+    try {
+        const connection = await getConnection();
+        const result = await connection.query("DELETE FROM user WHERE id = ?", [id]);
+        return true;
+    } catch(e) {
+        throw e;
+    }
+}
+
 export const methods = {
-    getUsers,
-    getUser,
-    addUser,
-    updateUser
+    getUsers: getUsers,
+    getUser: getUser,
+    addUser: addUser,
+    updateUser: updateUser,
+    deleteUser: deleteUser
 }
