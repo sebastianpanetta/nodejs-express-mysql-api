@@ -29,9 +29,7 @@ const getUser = async (req, res) => {
 const addUser = async (req, res) => {
     try {
         let user = new User(null, req.body.name, req.body.surname, req.body.email);
-
         user = await userService.addUser(user);
-
         console.log(user);
         res.json({
             message: "User added",
@@ -45,12 +43,9 @@ const addUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-
         const { id } = req.params;
-
         let user = await userService.getUser(id);
         user = await userService.updateUser(req.body, id);
-        
         res.json({
             message: "User updated",
             user: user
@@ -64,11 +59,8 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
-        
         await userService.getUser(id);
-        
         await userService.deleteUser(id);
-        
         res.json({
             message: "User deleted",
             id
